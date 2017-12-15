@@ -28,6 +28,9 @@ import (
 type WebSocketController struct {
 	baseController
 }
+type QueryController struct {
+	baseController
+}
 
  //Get method handles GET requests for WebSocketController.
 func (this *WebSocketController) Get() {
@@ -53,7 +56,7 @@ func (this *WebSocketController) Join() {
 
 	// Upgrade from http request to WebSocket.
 	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request, nil, 1024, 1024)
-	fmt.Println("登录请求",this.Ctx.Request)
+	//fmt.Println("登录请求",this.Ctx.Request)
 	if _, ok := err.(websocket.HandshakeError); ok {
 		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
 		return
@@ -94,4 +97,27 @@ func broadcastWebSocket(event models.Event) {
 			}
 		}
 	}
+}
+
+func (q *QueryController) Get() {
+
+	//username := q.GetString("username")
+	//if len(username) == 0 {
+	//	q.Redirect("/", 302)
+	//	return
+	//}
+	//fmt.Println(username)
+	q.TplName = "query.html"
+	//q.Data["UserName"] = username
+}
+
+
+func (q *QueryController) QueryRecord()  {
+	q.TplName="query.html"
+	username :=q.GetString("username")
+	fmt.Println(username)
+	rs :=models.QueryRecord(username)
+	q.Data["json"] = &rs
+	q.ServeJSON()
+
 }

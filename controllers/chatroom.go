@@ -21,6 +21,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/gorilla/websocket"
 	"WebIM/models"
+	"fmt"
 )
 
 type Subscription struct {
@@ -33,6 +34,17 @@ func newEvent(ep models.EventType, user, msg string) models.Event {
 }
 
 func Join(user string, ws *websocket.Conn) {
+	//在user表中加入用户信息
+	if err := models.Query(user); err != nil {
+		//报错说明没有此行，应进行存储
+		beego.Info("进行存储个人信息")
+		models.AddUserMsg(user)
+
+	} else {
+		fmt.Println("数据库中已存在个人信息")
+		//fmt.Println(err)
+	}
+
 	subscribe <- Subscriber{Name: user, Conn: ws}
 }
 
@@ -62,7 +74,10 @@ func chatroom() {
 	for {
 		select {
 		case sub := <-subscribe:
-			if !isUserExist(subscribers, sub.Name) {
+			//判断数据库中是否存在该用户
+			isUserExist :=models.Query(sub.Name)
+			if isUserExist!=nil {
+				//错误不为空，则说明无此行，即为新用户
 				subscribers.PushBack(sub) // Add user to the end of list.
 				// Publish a JOIN event.
 				publish <- newEvent(models.EVENT_JOIN, sub.Name, "")
@@ -82,6 +97,7 @@ func chatroom() {
 
 			if event.Type == models.EVENT_MESSAGE {
 				beego.Info("Message from", event.User, ";Content:", event.Content)
+				models.Insert(event)
 			}
 		case unsub := <-unsubscribe:
 			for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
@@ -105,11 +121,11 @@ func init() {
 	go chatroom()
 }
 
-func isUserExist(subscribers *list.List, user string) bool {
-	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
-		if sub.Value.(Subscriber).Name == user {
-			return true
-		}
-	}
-	return false
-}
+//func isUserExist(subscribers *list.List, user string) bool {
+//	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
+//		if sub.Value.(Subscriber).Name == user {
+//			return true
+//		}
+//	}
+//	return false
+//}
