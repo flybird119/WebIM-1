@@ -75,9 +75,10 @@ func chatroom() {
 		select {
 		case sub := <-subscribe:
 			//判断数据库中是否存在该用户
-			isUserExist :=models.Query(sub.Name)
+			//isUserExist :=models.Query(sub.Name)
 			if isUserExist!=nil {
 				//错误不为空，则说明无此行，即为新用户
+				models.Query(sub.Name)
 				subscribers.PushBack(sub) // Add user to the end of list.
 				// Publish a JOIN event.
 				publish <- newEvent(models.EVENT_JOIN, sub.Name, "")
@@ -121,11 +122,12 @@ func init() {
 	go chatroom()
 }
 
-//func isUserExist(subscribers *list.List, user string) bool {
-//	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
-//		if sub.Value.(Subscriber).Name == user {
-//			return true
-//		}
-//	}
-//	return false
-//}
+func isUserExist(subscribers *list.List, user string) bool {
+
+	for sub := subscribers.Front(); sub != nil; sub = sub.Next() {
+		if sub.Value.(Subscriber).Name == user {
+			return true
+		}
+	}
+	return false
+}

@@ -20,6 +20,6 @@ func init() {
 	beego.Router("/ws", &controllers.WebSocketController{})
 	beego.Router("/ws/join", &controllers.WebSocketController{}, "*:Join")
 	beego.Router("/qr", &controllers.QueryController{})
-	beego.Router("/query", &controllers.QueryController{}, "*:QueryRecord")
+	beego.Router("/qr/query", &controllers.QueryController{}, "*:QueryRecord")
 
 }

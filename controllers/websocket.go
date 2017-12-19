@@ -101,14 +101,7 @@ func broadcastWebSocket(event models.Event) {
 
 func (q *QueryController) Get() {
 
-	//username := q.GetString("username")
-	//if len(username) == 0 {
-	//	q.Redirect("/", 302)
-	//	return
-	//}
-	//fmt.Println(username)
 	q.TplName = "query.html"
-	//q.Data["UserName"] = username
 }
 
 
